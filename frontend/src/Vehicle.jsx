@@ -4,7 +4,7 @@ function Car(props) {
   if (props.carinfo){
     return (
     <> 
-    My car is a {props.carinfo.color} {props.carinfo.year} {props.carinfo.brand} {props.carinfo.model}!
+    {props.carinfo.brand && <p>My car is a {props.carinfo.color} {props.carinfo.year} {props.carinfo.brand} {props.carinfo.model}!</p>}
     </>
     );
   }
@@ -15,7 +15,6 @@ function Car(props) {
       <p>My car is a {rest.color} {rest.year} {brand} {model}!</p>
     </>
   );
-
   }
   
 }
