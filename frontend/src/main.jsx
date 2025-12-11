@@ -1,6 +1,8 @@
 import { createRoot } from 'react-dom/client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
 import Car from './Vehicle.jsx'
+import './index.css'
 
 const myelement = (
   <table>
@@ -23,6 +25,117 @@ const secondCar = {
   brand: "Ford", 
   year: x[1]
 }
+
+
+function MainApp(){
+  const [data, setData] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const [editedData, setEditedData] = useState({});
+
+  useEffect(() =>{
+    axios.get('http://localhost:8000/students/').then(response => {setData(response.data);}).catch(error => { console.error('Error fetching data: ', error);});
+
+  }, []);
+
+  const handleEdit = (student) => {
+    setEditingId(student.id);
+    setEditedData(student);
+  };
+
+  const handleSave = () => {
+    axios.patch(`http://localhost:8000/students/${editingId}`, {name: editedData.name, age: editedData.age, grade: editedData.grade})
+    setData(data.map(row => row.id === editingId ? editedData : row));
+    setEditingId(null);
+    setEditedData({});
+  };
+
+  const handleChange = (field, value) => {
+    setEditedData({...editedData, [field]: value});
+  };
+
+  const columns = [{ header: 'ID', accessor: 'id' }, { header: 'Name', accessor: 'name' }, { header: 'Age', accessor: 'age' },  { header: 'Grade', accessor: 'grade' }, { header: 'Edit', accessor: 'edit' }];
+  return(
+    // <div>
+    //   <h1>React app</h1>
+    //   <p>{message}</p>
+
+    // </div>
+
+    <CustomTable data={data} columns={columns} onEdit={handleEdit} editingId={editingId} editedData={editedData} onSave={handleSave} onChange={handleChange}/>
+
+  );
+
+}
+
+
+// const SimpleTable = ({ data, columns }) => {
+//   return (
+//     <table className = "styled-table">
+//       <thead>
+//         <tr>
+//           {columns.map((column) => (
+//             <th key={column.header}>{column.header}</th>
+//           ))}
+//         </tr>
+//       </thead>
+//       <tbody>
+//         {data.map((row, rowIndex) => (
+//           <tr key={rowIndex}>
+//             {columns.map((column, colIndex) => (
+//               <td key={colIndex}>{row[column.accessor]}</td>
+//             ))}
+//           </tr>
+//         ))}
+//       </tbody>
+//     </table>
+//   );
+// };
+
+
+const CustomTable = ({ data, columns, onEdit, editingId, editedData, onSave, onChange }) => {
+  return (
+    <div className="table-container">
+      <table className="data-table">
+        <thead>
+          <tr>
+            {columns.map((column) => (
+              <th key={column.accessor}>{column.header}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((row, rowIndex) => (
+            <tr key={rowIndex}>
+              {columns.map((column) => (
+                <td key={column.accessor}>
+                  {column.accessor === 'edit' ? (
+                    row.id === editingId ? (
+                      <button onClick={onSave}>Save</button>
+                    ) : (
+                      <button onClick={() => onEdit(row)} disabled={editingId !== null}>Edit</button>
+                    )
+                  ) : (
+                    row.id === editingId && column.accessor !== 'id' ? (
+                      <input
+                        type="text"
+                        value={editedData[column.accessor] || ''}
+                        onChange={(e) => onChange(column.accessor, e.target.value)}
+                      />
+                    ) : (
+                      row[column.accessor]
+                    )
+                  )}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+
 
 function Son(props){
   return (
@@ -126,30 +239,93 @@ function MyCars() {
   )
 }
 
+// function MyForm(){
+
+//   const [inputs, setInputs] = useState({myCar: "Volvo", name: "", mytxt:""});
+  
+//   const handleChange = (e) => {
+//     const name = e.target.name;
+//     const value = e.target.value;
+//     setInputs(values =>({...values, [name]: value}))
+//   }
+
+//   const handleSubmit = (e) => {
+//     e.preventDefault();
+//     alert(inputs.name);
+//   }
+   
+//   return (
+//     <form onSubmit={handleSubmit}>
+//       <label>Enter your name:
+//         <input 
+//           type="text" 
+//           name="name"
+//           value={inputs.name || ""} 
+//           onChange={handleChange}
+//         /> 
+//       </label>
+//       <br/> <br/>
+//        <label>Write here:
+//           <textarea
+//             name = "mytxt"
+//             value = {inputs.mytxt || ""}
+//             onChange={handleChange}
+//           />
+//       </label>
+//       <input type="submit"/>
+//       <select name="myCar" value={inputs.myCar} onChange={handleChange}>
+//         <option value="Ford">Ford</option>
+//         <option value="Volvo">Volvo</option>
+//         <option value="Fiat">Fiat</option>
+//       </select>
+//     </form>
+//   );
+// }
+
 function MyForm(){
-  const [name, setName] = useState("John");
+  const [inputs, setInputs] = useState({tomato: true, onion: false});
+    const handleChange = (e) => {
+      const target = e.target;
+      const value = target.type === 'checkbox' ? target.checked : target.value;
+      const name = target.name;
+      setInputs(values => ({...values, [name]: value}))
 
-  function handleChange(e) {
-    setName(e.target.value);
+    }
+    const handleSubmit = (event) => {
+      let fillings = '';
+      if (inputs.tomato) fillings += 'tomato';
+      if (inputs.onion){
+        if (inputs.tomato) fillings += ' and ';
+        fillings += 'onion';
+    }
+
+    if (fillings == '') fillings = 'no fillings';
+    alert(`${inputs.firstname} wants a burger with ${fillings}`);
+    event.preventDefault();
   }
-  return (
-    <form>
-      <label>Enter your name:
-        <input 
-          type="text" 
-          value={name} 
-          onChange={handleChange}
-        /> 
-      </label>
-      <p> Current value: {name}</p>
-    </form>
-  );
-}
+    return (
+      <form onSubmit= {handleSubmit}>
+        <label> My name is: 
+          <input type='text' name='firstname' value={inputs.firstname} onChange={handleChange}></input>
+        </label>
 
+        <p>I want a burger with: </p>
+        <label>Tomato: 
+         <input type='checkbox' name='tomato' checked = {inputs.tomato} onChange={handleChange}></input>
+        </label>
+        <label>Onion: 
+        <input type='checkbox' name='onion' checked = {inputs.onion} onChange={handleChange}></input>
+        </label>
+       <label>
+          <button type="submit">Submit</button>
+        </label>
+      </form>
+  )
+};
 
 
 createRoot(document.getElementById('head')).render(
-  <Intro/>
+  <MainApp/>
 );
 
 // createRoot(document.getElementById('next')).render(
@@ -176,6 +352,6 @@ createRoot(document.getElementById('sixth')).render(
 
 
 createRoot(document.getElementById('seventh')).render(
-  <MyForm />
+  
 );
 

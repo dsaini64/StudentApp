@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Field, Session, SQLModel, create_engine, select
 
 
@@ -34,9 +35,11 @@ def create_db_and_tables():
 def get_session():
     with Session(engine) as session:
         yield session
-    
+   
+origins = ["http://localhost:5173"]
 SessionDep = Annotated[Session, Depends(get_session)]
 app = FastAPI()
+app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 @app.on_event("startup")
 def on_startup():
@@ -83,5 +86,9 @@ def update_student(student_id: int, student: StudentUpdate, session: SessionDep)
     session.refresh(db_student)
     return db_student
     
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
     

@@ -24,16 +24,10 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
 
 button {
   border-radius: 8px;
@@ -66,3 +60,33 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.data-table {
+  border-collapse: collapse;
+  border: 1px solid black;
+  margin: 20px auto;
+}
+
+.data-table th, .data-table td {
+  border: 1px solid black;
+  padding: 8px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.data-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+  text-align: center;
+}
+
+.data-table input {
+  width: 100px;
+  box-sizing: border-box;
+  padding: 4px;
+  border: 1px solid #ccc;
+  font-size: inherit;
+  font-family: inherit;
+}
+
+
